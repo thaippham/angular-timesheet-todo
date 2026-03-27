@@ -4,7 +4,6 @@
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  font-family: 'Roboto', sans-serif;
 }
 
 .header-container {
@@ -18,7 +17,7 @@
   margin: 0;
   font-size: 24px;
   font-weight: 500;
-  color: #333;
+  color: rgb(0, 95, 46);
 }
 
 .view-control {
@@ -147,6 +146,11 @@
 }
 .button-add{
   padding: 0 30px 24px 30px;
+  button{
+    background-color: rgb(40, 238, 136) !important;
+    color: rgb(0, 95, 46) !important;
+    font-weight: bold !important;
+  }
 }
 
 @media (max-width: 768px) {
