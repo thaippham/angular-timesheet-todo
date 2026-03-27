@@ -21,4 +21,13 @@
 }
 ::ng-deep mat-toolbar.mat-toolbar {
     color: green !important;
+    font-weight: bold !important;
+}
+::ng-deep span.mat-list-item-content {
+    color: green !important;
+    font-weight: 500 !important;
+}
+.custome-toolbar {
+  box-shadow: -3px 3px 3px -3px rgba(0, 0, 0, 0.2), 0px 3px 7px 2px rgb(0 0 0 / 8%), 0px 0px 8px 0px rgb(185 185 185 / 0%) !important;
+  background: white !important;
 }

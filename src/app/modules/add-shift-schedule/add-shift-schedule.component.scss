@@ -30,6 +30,11 @@
   color: #880e4f;
   border: 1px solid #f8bbd0;
 }
+.submit-button{
+  background-color: rgb(40, 238, 136) !important;
+  color: rgb(0, 95, 46) !important;
+  font-weight: bold !important;
+}
 ::ng-deep .mat-select-trigger{
     align-items: flex-end !important;
 }

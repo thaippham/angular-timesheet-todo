@@ -1,4 +1,18 @@
-body{
+@use '@angular/material' as mat;
+
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+
+$my-custom-typography: mat.define-typography-config($font-family: '"Quicksand", sans-serif');
+
+@include mat.all-component-typographies($my-custom-typography);
+@include mat.typography-hierarchy($my-custom-typography);
+
+html,
+body {
+    height: 100%;
+}
+
+body {
     margin: 0;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-family: 'Quicksand', sans-serif;
 }
