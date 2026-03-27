@@ -1,0 +1,61 @@
+<div class="schedule-wrapper mat-elevation-z3">
+
+  <div class="header-container">
+    <h1 class="main-title">Bảng Phân Ca Nhân Viên</h1>
+
+    <div class="view-control">
+      <mat-form-field appearance="outline" class="gender-selector">
+        <mat-label>Chế độ xem giới tính</mat-label>
+        <mat-select [(ngModel)]="currentUserGender">
+          <mat-option value="">Tất cả</mat-option>
+          <mat-option value="nam">Nam</mat-option>
+          <mat-option value="nữ">Nữ</mat-option>
+        </mat-select>
+        <span matSuffix style="padding-right: 12px; color: #666;">
+          <i *ngIf="currentUserGender === 'nam'" class="fa fa-male"></i>
+          <i *ngIf="currentUserGender === 'nữ'" class="fa fa-female"></i>
+        </span>
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="button-add">
+    <button mat-raised-button color="primary" (click)="openAddEmployeeDialog()">
+      + Phân công nhân viên
+    </button>
+  </div>
+  <div class="table-scroll-container">
+    <table class="schedule-table">
+      <thead>
+        <tr>
+          <th class="shift-col sticky-col">Ca / Ngày</th>
+          <th *ngFor="let day of days" class="day-col">{{ day }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let shift of shifts">
+          <td class="shift-name sticky-col">
+            <span class="shift-icon-wrapper">
+              {{ shift }}
+            </span>
+          </td>
+
+          <td *ngFor="let day of days" class="shift-cell" (dblclick)="openAddEmployeeDialog(shift, day)"
+            title="Bấm đúp để phân công nhân viên">
+
+            <div class="employee-list">
+              <div class="employee-item" matRipple *ngFor="let emp of getEmployeesForShift(shift, day)"
+                [ngClass]="{'male-emp': emp.gender === 'nam', 'female-emp': emp.gender === 'nữ'}">
+                <span class="emp-name">{{ emp.name }}</span>
+              </div>
+            </div>
+
+            <div class="no-data-v17" *ngIf="getEmployeesForShift(shift, day).length === 0">
+              <span class="empty-icon">-</span>
+            </div>
+
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,1 @@
+interface PictureInPictureEvent extends Event {}

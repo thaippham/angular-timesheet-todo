@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>Phân Công Ca Làm Việc</h2>
+
+<mat-dialog-content>
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+
+        <mat-form-field appearance="outline">
+            <mat-label>Chọn Ca</mat-label>
+            <mat-select [(ngModel)]="selectedShift" (ngModelChange)="loadExistingEmployees()">
+                <mat-option *ngFor="let shift of data.shifts" [value]="shift">{{ shift }}</mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Chọn Ngày</mat-label>
+            <mat-select [(ngModel)]="selectedDay" (ngModelChange)="loadExistingEmployees()">
+                <mat-option *ngFor="let day of data.days" [value]="day">{{ day }}</mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Chọn Nhân viên</mat-label>
+            <mat-select [(ngModel)]="selectedEmployees" multiple [compareWith]="compareEmployee">
+
+                <mat-select-trigger>
+                    <div class="selected-chip-list">
+                        <span class="custom-chip"
+                            [ngClass]="{'chip-male': emp.gender === 'nam', 'chip-female': emp.gender === 'nữ'}"
+                            *ngFor="let emp of selectedEmployees">
+                            {{ emp.name }}
+                        </span>
+                    </div>
+                </mat-select-trigger>
+
+                <mat-option *ngFor="let emp of allEmployees" [value]="emp">
+                    {{ emp.name }} ({{ emp.gender }})
+                </mat-option>
+
+            </mat-select>
+        </mat-form-field>
+
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Hủy</button>
+    <button mat-raised-button color="primary" (click)="onSave()">Lưu Phân Công</button>
+</mat-dialog-actions>

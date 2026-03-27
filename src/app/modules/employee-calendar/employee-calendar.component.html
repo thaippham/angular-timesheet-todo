@@ -1,0 +1,21 @@
+<div class="calendar-wrapper mat-elevation-z3">
+  
+  <div class="header-container">
+    <h2 class="title">Lịch Trực Chi Tiết</h2>
+
+    <mat-form-field appearance="outline" class="employee-selector">
+      <mat-label>Xem lịch của</mat-label>
+      <mat-select [(ngModel)]="selectedEmployeeId" (ngModelChange)="onEmployeeChange()">
+        <mat-option value="all">-- Tất cả nhân viên --</mat-option>
+        <mat-option *ngFor="let emp of employees" [value]="emp.id">
+          {{ emp.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="calendar-body">
+    <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+  </div>
+
+</div>

@@ -1,0 +1,35 @@
+.full-width {
+  width: 100%;
+}
+
+.selected-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.custom-chip {
+  border-radius: 16px;
+  padding: 3px 10px;
+  font-size: 13px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.chip-male {
+  background-color: #e3f2fd; 
+  color: #0d47a1;
+  border: 1px solid #bbdefb;
+}
+
+.chip-female {
+  background-color: #fce4ec; 
+  color: #880e4f;
+  border: 1px solid #f8bbd0;
+}
+::ng-deep .mat-select-trigger{
+    align-items: flex-end !important;
+}
