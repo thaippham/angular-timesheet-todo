@@ -1,3 +1,4 @@
+import { AuthGuard } from './core/guards/auth.guard';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -24,6 +25,10 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { MatMenuModule } from '@angular/material/menu';
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { LoginModule } from './modules/login/login.module';
 
 FullCalendarModule.registerPlugins([
   dayGridPlugin,
@@ -57,8 +62,17 @@ FullCalendarModule.registerPlugins([
     MatIconModule,
     MatListModule,
     MatSidenavModule,
+    HttpClientModule,
+    MatMenuModule,
+    LoginModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
