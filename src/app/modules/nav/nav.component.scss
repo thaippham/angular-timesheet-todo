@@ -31,3 +31,22 @@
   box-shadow: -3px 3px 3px -3px rgba(0, 0, 0, 0.2), 0px 3px 7px 2px rgb(0 0 0 / 8%), 0px 0px 8px 0px rgb(185 185 185 / 0%) !important;
   background: white !important;
 }
+.spacer {
+  flex: 1 1 auto;
+}
+
+.user-info-btn {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  
+  .mat-icon {
+    margin: 0;
+  }
+}
+
+.user-name {
+  margin: 0 8px;
+  font-size: 15px;
+  font-weight: 500;
+}

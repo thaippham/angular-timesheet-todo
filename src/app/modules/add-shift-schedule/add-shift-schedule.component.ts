@@ -1,3 +1,4 @@
+import { UserShiftScheduleService } from './../../data/service/view/user-shift-schedule.service';
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
@@ -11,34 +12,53 @@ export class AddShiftScheduleComponent implements OnInit {
   selectedDay: string = '';
   selectedEmployees: any[] = [];
 
-  allEmployees = [
-    { id: 1, name: 'Nguyễn Văn A', gender: 'nam' }, 
-    { id: 2, name: 'Trần Thị B', gender: 'nữ' },
-    { id: 3, name: 'Lê Văn C', gender: 'nam' },
-    { id: 4, name: 'Phạm Thị D', gender: 'nữ' },
-    { id: 10, name: 'Lý Tiểu Long', gender: 'nam' },
-    { id: 11, name: 'Lưu Diệc Phi', gender: 'nữ' }
-  ];
+  allEmployees: any[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<AddShiftScheduleComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {}
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private scheduleService: UserShiftScheduleService
+  ) { }
 
   ngOnInit(): void {
-    if (this.data.preSelectedShift && this.data.preSelectedDay) {
-      this.selectedShift = this.data.preSelectedShift;
-      this.selectedDay = this.data.preSelectedDay;
-      
-      this.loadExistingEmployees();
-    }
+    this.scheduleService.getAllEmployees().subscribe({
+      next: (users) => {
+        this.allEmployees = users.map((u: any) => ({
+          id: u._id,
+          name: u.name,
+          gender: u.gender
+        }));
+
+        if (this.data.preSelectedShift && this.data.preSelectedDay) {
+          this.selectedShift = this.data.preSelectedShift;
+          this.selectedDay = this.data.preSelectedDay;
+          this.loadExistingEmployees();
+        }
+      },
+      error: (err) => console.error('Lỗi khi lấy danh sách nhân viên', err)
+    });
+  }
+
+  loadAllEmployees(): void {
+    this.scheduleService.getAllEmployees().subscribe({
+      next: (users) => {
+        this.allEmployees = users.map((u: any) => ({
+          id: u._id,
+          name: u.name,
+          gender: u.gender
+        }));
+      },
+      error: (err) => console.error('Lỗi khi lấy danh sách nhân viên', err)
+    });
   }
 
   loadExistingEmployees(): void {
     if (this.selectedShift && this.selectedDay) {
       const existingEmps = this.data.scheduleData[this.selectedShift]?.[this.selectedDay] || [];
-      
-      this.selectedEmployees = [...existingEmps];
+
+      this.selectedEmployees = this.allEmployees.filter(allEmp =>
+        existingEmps.some((exEmp: any) => (exEmp.id === allEmp.id || exEmp._id === allEmp.id))
+      );
     } else {
       this.selectedEmployees = [];
     }
@@ -54,10 +74,16 @@ export class AddShiftScheduleComponent implements OnInit {
 
   onSave(): void {
     if (this.selectedShift && this.selectedDay) {
+      const formattedEmployees = this.selectedEmployees.map(emp => ({
+        _id: emp.id || emp._id,
+        name: emp.name,
+        gender: emp.gender
+      }));
+
       this.dialogRef.close({
         shift: this.selectedShift,
         day: this.selectedDay,
-        employees: this.selectedEmployees
+        employees: formattedEmployees
       });
     } else {
       alert("Vui lòng chọn đầy đủ Ca và Ngày!");

@@ -1,0 +1,44 @@
+<div class="login-container">
+  <mat-card class="login-card mat-elevation-z4">
+    <mat-card-header>
+      <mat-card-title>Đăng Nhập</mat-card-title>
+      <mat-card-subtitle>Hệ thống Quản lý Phân ca</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        
+        <div class="error-message" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tài khoản</mat-label>
+          <input matInput formControlName="username" placeholder="Nhập tài khoản">
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
+            Vui lòng nhập tài khoản
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Mật khẩu</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" placeholder="Nhập mật khẩu">
+          <mat-icon matPrefix>lock</mat-icon>
+          <button type="button" mat-icon-button matSuffix (click)="hidePassword = !hidePassword">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+            Vui lòng nhập mật khẩu
+          </mat-error>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" class="submit-btn" [disabled]="loginForm.invalid || isLoading">
+          <span *ngIf="!isLoading">Đăng Nhập</span>
+          <span *ngIf="isLoading">Đang xử lý...</span>
+        </button>
+        
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

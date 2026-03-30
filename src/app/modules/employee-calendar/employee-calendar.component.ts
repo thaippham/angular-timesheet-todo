@@ -1,3 +1,6 @@
+import { UserShiftScheduleService } from './../../data/service/view/user-shift-schedule.service';
+import { CalendarWorkService } from './../../data/service/view/calendar-work.service';
+import { JwtTokenService } from './../../data/service/jwtToken/jwtToken.service';
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CalendarOptions, FullCalendarComponent } from '@fullcalendar/angular';
 import viLocale from '@fullcalendar/core/locales/vi';
@@ -10,8 +13,19 @@ import viLocale from '@fullcalendar/core/locales/vi';
 export class EmployeeCalendarComponent implements OnInit {
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
 
+  constructor(
+    private jwtToken: JwtTokenService,
+    private calendarWorkService: CalendarWorkService,
+    private userService: UserShiftScheduleService
+  ){
+
+  }
+
+  isManager: boolean = false;
+  currentUserId: number | string = ''; 
+  selectedEmployeeId: number | string | 'all' = 'all';
+
   ngAfterViewInit(): void {
-    this.adjustCalendarView(window.innerWidth);
   }
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
@@ -22,62 +36,25 @@ export class EmployeeCalendarComponent implements OnInit {
     if (!this.calendarComponent) return;
     
     const calendarApi = this.calendarComponent.getApi();
+    const currentView = calendarApi.view.type;
+    const targetView = width < 768 ? 'timeGridDay' : 'timeGridWeek';
     
-    if (width < 768) {
-      calendarApi.changeView('timeGridDay');
-    } else {
-      calendarApi.changeView('timeGridWeek');
+    if (currentView !== targetView) {
+      calendarApi.changeView(targetView);
     }
   }
 
-  selectedEmployeeId: number | 'all' = 'all';
-
-  employees = [
-    { id: 1, name: 'Nguyễn Văn A' },
-    { id: 2, name: 'Trần Thị B' },
-    { id: 3, name: 'Lê Văn C' }
-  ];
-
-  allShifts = [
-    { 
-      id: '1', employeeId: 1, title: 'Nguyễn Văn A', 
-      start: '2026-03-20T08:00:00', end: '2026-03-20T12:00:00',
-      gender: 'male' 
-    },
-    { 
-      id: '2', employeeId: 2, title: 'Trần Thị B', 
-      start: '2026-03-20T09:00:00', end: '2026-03-20T13:00:00',
-      gender: 'female' 
-    },
-    { 
-      id: '4', employeeId: 3, title: 'Lê Văn C', 
-      start: '2026-03-20T08:00:00', end: '2026-03-20T12:00:00',
-      gender: 'male' 
-    },
-    { 
-      id: '2', employeeId: 2, title: 'Trần Thị B', 
-      start: '2026-03-20T13:00:00', end: '2026-03-20T17:00:00',
-      gender: 'female' 
-    },
-    { 
-      id: '3', employeeId: 1, title: 'Nguyễn Văn A', 
-      start: '2026-03-21T08:00:00', end: '2026-03-21T12:00:00',
-      gender: 'male'
-    },
-    { 
-      id: '4', employeeId: 3, title: 'Lê Văn C', 
-      start: '2026-03-22T18:00:00', end: '2026-03-22T22:00:00',
-      gender: 'male' 
-    }
-  ];
+  allShifts: any[] = [];
+  employees: any[] = [];
 
   calendarOptions: CalendarOptions = {
-    initialView: 'timeGridWeek',
+    initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
       right: 'dayGridMonth,timeGridWeek,timeGridDay'
     },
+    datesSet: (arg) => this.onDateRangeChange(arg),
     slotMinTime: '06:00:00',
     slotMaxTime: '23:00:00',
     allDaySlot: false,
@@ -107,8 +84,8 @@ export class EmployeeCalendarComponent implements OnInit {
       
       let employeesHtml = employees.map(emp => {
         let textColor = '#333'; 
-        if (emp.gender === 'male') textColor = '#2d5a9e';
-        if (emp.gender === 'female') textColor = '#8d3363';
+        if (emp.gender === 'nam') textColor = '#2d5a9e';
+        if (emp.gender === 'nữ') textColor = '#8d3363';
 
         return `<li class="combined-employee-name" style="color: ${textColor} !important; font-weight: 600;">- ${emp.name}</li>`;
       }).join('');
@@ -127,17 +104,110 @@ export class EmployeeCalendarComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.filterEvents();
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decodedUser = this.jwtToken.decodeToken(token);
+      this.isManager = decodedUser.role === 'manager';
+      this.currentUserId = decodedUser._id || decodedUser.id;
+
+      if (!this.isManager) {
+        this.selectedEmployeeId = this.currentUserId;
+      } else {
+        this.loadEmployees();
+      }
+    }
+  }
+  loadEmployees(): void {
+    this.userService.getAllEmployees().subscribe({
+      next: (users) => {
+        this.employees = users.map((u: any) => ({
+          id: u._id,
+          name: u.name,
+          gender: u.gender
+        }));
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy danh sách nhân viên:', err);
+      }
+    });
   }
 
   onEmployeeChange(): void {
     this.filterEvents();
   }
+  onDateRangeChange(arg: any): void {
+    const startDate = arg.start;
+    const endDate = new Date(arg.end.getTime() - 86400000);
+
+    const fromDate = this.formatDate(startDate);
+    const toDate = this.formatDate(endDate);
+
+    console.log(`Đang tải dữ liệu từ ${fromDate} đến ${toDate}`);
+
+    this.loadDataFromApi(fromDate, toDate);
+  }
+  loadDataFromApi(fromDate: string, toDate: string): void {
+    let userIdToFetch = undefined;
+
+    if (!this.isManager) {
+      userIdToFetch = this.currentUserId;
+    }
+
+    this.calendarWorkService.getSchedulesByRange(fromDate, toDate, userIdToFetch)
+    .subscribe({
+      next: (data) => {
+        this.allShifts = data; 
+        
+        this.filterEvents(); 
+      },
+      error: (err) => console.error("Lỗi khi gọi API chấm công", err)
+    });
+  }
+  formatDataForCalendar(serverData: any[]): any[] {
+    let formattedShifts: any[] = [];
+    
+    serverData.forEach(schedule => {
+      
+      if (schedule.employees && schedule.employees.length > 0) {
+        schedule.employees.forEach((emp: any) => {
+          
+          let startTime = '08:00:00';
+          let endTime = '12:00:00';
+          if (schedule.shift === 'Trưa') { startTime = '13:00:00'; endTime = '17:00:00'; }
+          if (schedule.shift === 'Tối') { startTime = '18:00:00'; endTime = '22:00:00'; }
+
+          const dateStr = new Date(schedule.workDate).toISOString().split('T')[0];
+
+          formattedShifts.push({
+            id: schedule._id,
+            employeeId: emp._id || emp.id, 
+            title: emp.name, 
+            start: `${dateStr}T${startTime}`,
+            end: `${dateStr}T${endTime}`,
+            gender: emp.gender || 'male'
+          });
+        });
+      }
+    });
+
+    return formattedShifts;
+  }
+  formatDate(date: Date): string {
+    const d = new Date(date);
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    const year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+  }
 
   filterEvents(): void {
     let filteredShifts = this.selectedEmployeeId === 'all'
       ? this.allShifts
-      : this.allShifts.filter(shift => shift.employeeId === this.selectedEmployeeId);
+      : this.allShifts.filter(shift => shift.employeeId == this.selectedEmployeeId);
 
     const groups = new Map();
 
@@ -155,7 +225,7 @@ export class EmployeeCalendarComponent implements OnInit {
       }
       
       groups.get(key).employees.push({
-        name: shift.title,
+        name: shift.title || shift.name,
         gender: shift.gender
       });
     }

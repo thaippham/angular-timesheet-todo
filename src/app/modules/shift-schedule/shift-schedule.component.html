@@ -1,9 +1,8 @@
 <div class="schedule-wrapper mat-elevation-z3">
-
   <div class="header-container">
     <h1 class="main-title">Bảng Phân Ca Nhân Viên</h1>
 
-    <div class="view-control">
+    <div class="view-control" *ngIf="isManager">
       <mat-form-field appearance="outline" class="gender-selector">
         <mat-label>Chế độ xem giới tính</mat-label>
         <mat-select [(ngModel)]="currentUserGender">
@@ -18,11 +17,13 @@
       </mat-form-field>
     </div>
   </div>
-  <div class="button-add">
+
+  <div class="button-add" *ngIf="isManager">
     <button mat-raised-button (click)="openAddEmployeeDialog()">
       + Phân công nhân viên
     </button>
   </div>
+
   <div class="table-scroll-container">
     <table class="schedule-table">
       <thead>
@@ -34,14 +35,12 @@
       <tbody>
         <tr *ngFor="let shift of shifts">
           <td class="shift-name sticky-col">
-            <span class="shift-icon-wrapper">
-              {{ shift }}
-            </span>
+            <span class="shift-icon-wrapper">{{ shift }}</span>
           </td>
 
           <td *ngFor="let day of days" class="shift-cell" (dblclick)="openAddEmployeeDialog(shift, day)"
-            title="Bấm đúp để phân công nhân viên">
-
+            [title]="isManager ? 'Bấm đúp để phân công nhân viên' : ''">
+            
             <div class="employee-list">
               <div class="employee-item" matRipple *ngFor="let emp of getEmployeesForShift(shift, day)"
                 [ngClass]="{'male-emp': emp.gender === 'nam', 'female-emp': emp.gender === 'nữ'}">
@@ -52,7 +51,6 @@
             <div class="no-data-v17" *ngIf="getEmployeesForShift(shift, day).length === 0">
               <span class="empty-icon">-</span>
             </div>
-
           </td>
         </tr>
       </tbody>
