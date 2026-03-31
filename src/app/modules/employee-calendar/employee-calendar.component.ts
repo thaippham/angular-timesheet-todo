@@ -4,6 +4,7 @@ import { JwtTokenService } from './../../data/service/jwtToken/jwtToken.service'
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CalendarOptions, FullCalendarComponent } from '@fullcalendar/angular';
 import viLocale from '@fullcalendar/core/locales/vi';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-employee-calendar',
@@ -23,7 +24,15 @@ export class EmployeeCalendarComponent implements OnInit {
 
   isManager: boolean = false;
   currentUserId: number | string = ''; 
+  currentUserIdTichHop: number | string = '';
   selectedEmployeeId: number | string | 'all' = 'all';
+  currentLoadedMonth: number | null = null;
+  currentLoadedYear: number | null = null;
+  gender: string = '';
+  nameUser: string = '';
+  fetchedMonths: Set<string> = new Set();
+  allShifts: any[] = [];
+  employees: any[] = [];
 
   ngAfterViewInit(): void {
   }
@@ -43,9 +52,6 @@ export class EmployeeCalendarComponent implements OnInit {
       calendarApi.changeView(targetView);
     }
   }
-
-  allShifts: any[] = [];
-  employees: any[] = [];
 
   calendarOptions: CalendarOptions = {
     initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
@@ -105,17 +111,19 @@ export class EmployeeCalendarComponent implements OnInit {
 
   ngOnInit(): void {
     const token = localStorage.getItem('token');
+    const tokenTichHop = localStorage.getItem('tokenTichHop');
     if (token) {
       const decodedUser = this.jwtToken.decodeToken(token);
-      this.isManager = decodedUser.role === 'manager';
+      this.isManager = decodedUser.role.role === 'manager';
+      this.gender = decodedUser.gender;
+      this.nameUser = decodedUser.name;
       this.currentUserId = decodedUser._id || decodedUser.id;
-
-      if (!this.isManager) {
-        this.selectedEmployeeId = this.currentUserId;
-      } else {
-        this.loadEmployees();
-      }
     }
+    if(tokenTichHop){
+      const decodedUser = this.jwtToken.decodeToken(tokenTichHop);
+      this.currentUserIdTichHop = decodedUser._id || decodedUser.id;
+    }
+    this.loadEmployees();
   }
   loadEmployees(): void {
     this.userService.getAllEmployees().subscribe({
@@ -123,7 +131,8 @@ export class EmployeeCalendarComponent implements OnInit {
         this.employees = users.map((u: any) => ({
           id: u._id,
           name: u.name,
-          gender: u.gender
+          gender: u.gender,
+          role: u.role
         }));
       },
       error: (err) => {
@@ -137,71 +146,88 @@ export class EmployeeCalendarComponent implements OnInit {
   }
   onDateRangeChange(arg: any): void {
     const startDate = arg.start;
-    const endDate = new Date(arg.end.getTime() - 86400000);
+    const endDate = new Date(arg.end.getTime() - 1);
 
-    const fromDate = this.formatDate(startDate);
-    const toDate = this.formatDate(endDate);
+    const startMonth = startDate.getMonth();
+    const startYear = startDate.getFullYear();
+    
+    const endMonth = endDate.getMonth();
+    const endYear = endDate.getFullYear();
 
-    console.log(`Đang tải dữ liệu từ ${fromDate} đến ${toDate}`);
+    const startKey = `${startMonth}-${startYear}`;
+    const endKey = `${endMonth}-${endYear}`;
 
-    this.loadDataFromApi(fromDate, toDate);
-  }
-  loadDataFromApi(fromDate: string, toDate: string): void {
-    let userIdToFetch = undefined;
+    const monthsToFetch: any[] = [];
 
-    if (!this.isManager) {
-      userIdToFetch = this.currentUserId;
+    if (!this.fetchedMonths.has(startKey)) {
+      monthsToFetch.push({ month: startMonth, year: startYear, key: startKey });
     }
 
-    this.calendarWorkService.getSchedulesByRange(fromDate, toDate, userIdToFetch)
-    .subscribe({
-      next: (data) => {
-        this.allShifts = data; 
+    if (startKey !== endKey && !this.fetchedMonths.has(endKey)) {
+      monthsToFetch.push({ month: endMonth, year: endYear, key: endKey });
+    }
+
+    if (monthsToFetch.length > 0) {
+      console.log('Tiến hành tải dữ liệu cho:', monthsToFetch.map(m => m.key).join(', '));
+      this.loadDataFromApi(monthsToFetch);
+    } else {
+      this.filterEvents();
+    }
+  }
+  loadDataFromApi(monthsToFetch: any[]): void {
+    let userIdToFetch: number | string | undefined = undefined;
+
+    if (!this.isManager) {
+      userIdToFetch = this.currentUserIdTichHop;
+    }
+
+    const apiRequests = monthsToFetch.map(m => 
+      this.calendarWorkService.getSchedulesByRange(m.month, m.year, userIdToFetch)
+    );
+
+    forkJoin(apiRequests).subscribe({
+      next: (responses: any[]) => {
+        let newWorksData: any[] = [];
         
+        responses.forEach((res, index) => {
+          const worksData = res?.data?.works || res?.works || res || []; 
+          newWorksData = [...newWorksData, ...worksData];
+          
+          this.fetchedMonths.add(monthsToFetch[index].key);
+        });
+
+        const formattedNewShifts = this.formatDataForCalendar(newWorksData);
+        
+        this.allShifts = [...this.allShifts, ...formattedNewShifts]; 
+
         this.filterEvents(); 
       },
       error: (err) => console.error("Lỗi khi gọi API chấm công", err)
     });
   }
-  formatDataForCalendar(serverData: any[]): any[] {
+  formatDataForCalendar(worksData: any[]): any[] {
     let formattedShifts: any[] = [];
     
-    serverData.forEach(schedule => {
+    if (!worksData || worksData.length === 0) return formattedShifts;
+
+    worksData.forEach(work => {
+      const [day, month, year] = work.date.split('/');
+      const dateStr = `${year}-${month}-${day}`; 
+
+      const startDateTime = `${dateStr}T${work.startTime}:00`;
+      let endDateTime = `${dateStr}T${work.endTime}:00`;
       
-      if (schedule.employees && schedule.employees.length > 0) {
-        schedule.employees.forEach((emp: any) => {
-          
-          let startTime = '08:00:00';
-          let endTime = '12:00:00';
-          if (schedule.shift === 'Trưa') { startTime = '13:00:00'; endTime = '17:00:00'; }
-          if (schedule.shift === 'Tối') { startTime = '18:00:00'; endTime = '22:00:00'; }
-
-          const dateStr = new Date(schedule.workDate).toISOString().split('T')[0];
-
-          formattedShifts.push({
-            id: schedule._id,
-            employeeId: emp._id || emp.id, 
-            title: emp.name, 
-            start: `${dateStr}T${startTime}`,
-            end: `${dateStr}T${endTime}`,
-            gender: emp.gender || 'male'
-          });
-        });
-      }
+      formattedShifts.push({
+        id: work.id,
+        employeeId: work.accountId,
+        name: `${this.nameUser}`,
+        start: startDateTime,
+        end: endDateTime,
+        gender: this.gender
+      });
     });
 
     return formattedShifts;
-  }
-  formatDate(date: Date): string {
-    const d = new Date(date);
-    let month = '' + (d.getMonth() + 1);
-    let day = '' + d.getDate();
-    const year = d.getFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [year, month, day].join('-');
   }
 
   filterEvents(): void {

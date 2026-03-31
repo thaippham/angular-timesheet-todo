@@ -9,23 +9,24 @@ import { environment } from 'src/environments/environment';
 export class CalendarWorkService {
 
   private env = environment;
-  private apiUrl = this.env.apiUrl; 
+  private apiUrl = this.env.apiUrl;
+  private apiUrlTichHop = this.env.apiUrlTichHop;
 
   constructor(private http: HttpClient) {}
 
-  getSchedulesByRange(fromDate: string, toDate: string, userId?: string | number): Observable<any[]> {
+  getSchedulesByRange(fromDate: number, toDate: number, userId?: string | number): Observable<any[]> {
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('tokenTichHop');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     let params = new HttpParams()
-      .set('from-date', fromDate)
-      .set('to-date', toDate);
+      .set('month', fromDate)
+      .set('year', toDate);
 
     if (userId) {
-      params = params.set('userId', userId.toString());
+      params = params.set('accountId', userId.toString());
     }
 
-    return this.http.get<any[]>(`${this.apiUrl}/calendar-work/range`, { params, headers });
+    return this.http.get<any[]>(`${this.apiUrlTichHop}/employee/get-work-list`, { params, headers });
   }
 
 }

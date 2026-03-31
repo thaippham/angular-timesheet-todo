@@ -102,6 +102,9 @@
   color: rgb(0, 95, 46) !important;
   font-weight: bold !important;
 }
+::ng-deep button.fc-today-button.fc-button.fc-button-primary{
+  margin-left: 0;
+}
 @media (max-width: 768px) {
   .calendar-wrapper {
     margin: 10px;

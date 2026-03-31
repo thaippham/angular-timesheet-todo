@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 export class AuthService {
   private env = environment;
   private apiUrl = this.env.apiUrl;
+  private apiUrlTichHop = this.env.apiUrlTichHop;
 
   constructor(
     private http: HttpClient,
