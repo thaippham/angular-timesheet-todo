@@ -40,9 +40,16 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        
+        const encodedGender = btoa(encodeURIComponent(response?.data?.gender || response?.user.gender));
+
+        localStorage.setItem('token', response?.token);
+        localStorage.setItem('tokenTichHop', response?.tokenTichHop);
+        const userInfo = {
+          name: response.user?.name || this.loginForm.value.username,
+          path: encodedGender
+        }
+        localStorage.setItem('user', JSON.stringify(userInfo));
+
         this.router.navigate(['/']); 
       },
       error: (err) => {

@@ -10,9 +10,9 @@ export class AppComponent implements OnInit {
   userName: string = '';
   ngOnInit(): void {
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    if (storedUser !== undefined && storedUser !== null && storedUser.length > 0) {
       const user = JSON.parse(storedUser);
-      this.userName = user.name;
+      this.userName = user?.name || 'Khách';
     }
   }
 }
