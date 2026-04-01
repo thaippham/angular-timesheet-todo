@@ -28,7 +28,7 @@
     <table class="schedule-table">
       <thead>
         <tr>
-          <th class="shift-col sticky-col">Ca / Ngày</th>
+          <th class="shift-col sticky-col">Ca / Thứ</th>
           <th *ngFor="let day of days" class="day-col">{{ day }}</th>
         </tr>
       </thead>
@@ -43,7 +43,7 @@
             
             <div class="employee-list">
               <div class="employee-item" matRipple *ngFor="let emp of getEmployeesForShift(shift, day)"
-                [ngClass]="{'male-emp': emp.gender === 'nam', 'female-emp': emp.gender === 'nữ'}">
+                [ngClass]="{'male-emp': emp.gender.toLowerCase() === 'nam', 'female-emp': emp.gender.toLowerCase() === 'nữ'}">
                 <span class="emp-name">{{ emp.name }}</span>
               </div>
             </div>

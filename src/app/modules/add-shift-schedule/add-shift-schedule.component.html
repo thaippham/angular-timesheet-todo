@@ -24,7 +24,7 @@
                 <mat-select-trigger>
                     <div class="selected-chip-list">
                         <span class="custom-chip"
-                            [ngClass]="{'chip-male': emp.gender === 'nam', 'chip-female': emp.gender === 'nữ'}"
+                            [ngClass]="{'chip-male': emp.gender?.toLowerCase() === 'nam', 'chip-female': emp.gender?.toLowerCase() === 'nữ'}"
                             *ngFor="let emp of selectedEmployees">
                             {{ emp.name }}
                         </span>

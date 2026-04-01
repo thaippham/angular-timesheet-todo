@@ -105,6 +105,15 @@
 ::ng-deep button.fc-today-button.fc-button.fc-button-primary{
   margin-left: 0;
 }
+::ng-deep .fc .fc-button-primary:not(:disabled).fc-button-active:focus,
+::ng-deep .fc .fc-button-primary:focus,
+::ng-deep .fc .fc-button:focus{
+  box-shadow: none !important;
+}
+::ng-deep .fc .fc-button-group{
+  box-shadow: -3px 1px 0px 0px rgb(0 0 0), -2px 3px 0.9px 0 rgb(0 0 0);
+  border-radius: 6px;
+}
 @media (max-width: 768px) {
   .calendar-wrapper {
     margin: 10px;
