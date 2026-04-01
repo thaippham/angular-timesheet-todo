@@ -35,7 +35,7 @@ export class ShiftScheduleComponent implements OnInit {
     const token = localStorage.getItem('token');
     if (token) {
       const decodedUser = this.jwtToken.decodeToken(token);
-      this.isManager = decodedUser.role === 'manager';
+      this.isManager = decodedUser.role.role === 'manager';
     }
 
     this.loadData();
@@ -82,6 +82,6 @@ export class ShiftScheduleComponent implements OnInit {
 
   getEmployeesForShift(shift: string, day: string): Employee[] {
     const employees: Employee[] = this.scheduleData[shift]?.[day] || [];
-    return employees.filter(emp => emp.gender === this.currentUserGender || this.currentUserGender === '');
+    return employees.filter(emp => emp.gender?.toLowerCase() === this.currentUserGender?.toLowerCase() || this.currentUserGender === '');
   }
 }

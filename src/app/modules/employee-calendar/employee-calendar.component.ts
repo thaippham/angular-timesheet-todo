@@ -56,7 +56,7 @@ export class EmployeeCalendarComponent implements OnInit {
   calendarOptions: CalendarOptions = {
     initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
     headerToolbar: {
-      left: 'prev,next today',
+      left: 'prev,today,next',
       center: 'title',
       right: 'dayGridMonth,timeGridWeek,timeGridDay'
     },
@@ -89,11 +89,13 @@ export class EmployeeCalendarComponent implements OnInit {
       const employees = arg.event.extendedProps['employees'] as any[];
       
       let employeesHtml = employees.map(emp => {
+        let mopping = '';
         let textColor = '#333'; 
-        if (emp.gender === 'nam') textColor = '#2d5a9e';
-        if (emp.gender === 'nữ') textColor = '#8d3363';
+        if (emp.gender.toLowerCase() === 'nam') textColor = '#2d5a9e';
+        if (emp.gender.toLowerCase() === 'nữ') textColor = '#8d3363';
+        if(emp.isMopping) mopping = ' - LN';
 
-        return `<li class="combined-employee-name" style="color: ${textColor} !important; font-weight: 600;">- ${emp.name}</li>`;
+        return `<li class="combined-employee-name" style="color: ${textColor} !important; font-weight: bold; font-size: 15px;">- ${emp.name}${mopping}</li>`;
       }).join('');
       
       return {
@@ -220,6 +222,7 @@ export class EmployeeCalendarComponent implements OnInit {
       formattedShifts.push({
         id: work.id,
         employeeId: work.accountId,
+        isMopping: work.isMopping,
         name: `${this.nameUser}`,
         start: startDateTime,
         end: endDateTime,
@@ -252,7 +255,8 @@ export class EmployeeCalendarComponent implements OnInit {
       
       groups.get(key).employees.push({
         name: shift.title || shift.name,
-        gender: shift.gender
+        gender: shift.gender,
+        isMopping: shift.isMopping
       });
     }
 

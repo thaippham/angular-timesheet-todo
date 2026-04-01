@@ -120,7 +120,9 @@
   cursor: pointer;
   height: 36px;
 }
-
+.emp-name{
+  font-weight: bold;
+}
 .employee-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
@@ -150,6 +152,7 @@
     background-color: rgb(40, 238, 136) !important;
     color: rgb(0, 95, 46) !important;
     font-weight: bold !important;
+    box-shadow: -3px 1px 0px 0px rgb(0 0 0), -2px 3px 0.9px 0 rgb(0 0 0) !important;
   }
 }
 
