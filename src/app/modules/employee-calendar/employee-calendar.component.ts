@@ -109,8 +109,8 @@ export class EmployeeCalendarComponent implements OnInit {
         return `<li class="combined-employee-name" style="color: ${textColor} !important; font-weight: bold; font-size: 15px;">
                   - ${emp.name}
                   <div>
-                    ${mopping}
                     <div style="color: #05460a; font-weight: normal; font-size: 13px;">${formattedSalary !== '0' ? `Lương ngày: ${formattedSalary}đ` : ''}</div>
+                    ${mopping}
                   </div>
                 </li>`;
       }).join('');
