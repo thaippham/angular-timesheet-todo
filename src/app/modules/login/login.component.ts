@@ -14,12 +14,13 @@ export class LoginComponent implements OnInit {
   hidePassword = true;
   isLoading = false;
   errorMessage = '';
+  isFirstLogin = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (localStorage.getItem('token')) {
@@ -27,6 +28,7 @@ export class LoginComponent implements OnInit {
     }
 
     this.loginForm = this.fb.group({
+      name: [''],
       username: ['', Validators.required],
       password: ['', Validators.required]
     });
@@ -40,17 +42,24 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
-        const encodedGender = btoa(encodeURIComponent(response?.data?.gender || response?.user.gender));
 
-        localStorage.setItem('token', response?.token);
-        localStorage.setItem('tokenTichHop', response?.tokenTichHop);
-        const userInfo = {
-          name: response.user?.name || this.loginForm.value.username,
-          path: encodedGender
+        if (!response?.isFirtLogin) {
+          const encodedGender = btoa(encodeURIComponent(response?.data?.gender || response?.user.gender));
+
+          localStorage.setItem('token', response?.token);
+          localStorage.setItem('tokenTichHop', response?.tokenTichHop);
+          const userInfo = {
+            name: response.user?.name || this.loginForm.value.username,
+            path: encodedGender
+          }
+          localStorage.setItem('user', JSON.stringify(userInfo));
+          this.router.navigate(['/']);
+        }else{
+          this.loginForm.get('name')?.setValidators(Validators.required);
+          this.isFirstLogin = true;
+          this.isLoading = false;
+          this.errorMessage = response?.message || 'Đăng nhập lần đầu cần thêm họ và tên!';
         }
-        localStorage.setItem('user', JSON.stringify(userInfo));
-
-        this.router.navigate(['/']); 
       },
       error: (err) => {
         this.isLoading = false;

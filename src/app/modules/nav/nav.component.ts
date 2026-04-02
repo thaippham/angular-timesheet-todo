@@ -37,6 +37,7 @@ export class NavComponent {
   }
 
   logout(): void {
+    localStorage.removeItem('tokenTichHop');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.router.navigate(['/login']); 

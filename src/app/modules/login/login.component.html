@@ -12,6 +12,15 @@
           {{ errorMessage }}
         </div>
 
+        <mat-form-field appearance="outline" class="full-width" *ngIf="isFirstLogin">
+          <mat-label>Họ và tên</mat-label>
+          <input matInput formControlName="name" placeholder="Nhập họ và tên">
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="loginForm.get('name')?.hasError('required')">
+            Vui lòng nhập tên
+          </mat-error>
+        </mat-form-field>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Tài khoản</mat-label>
           <input matInput formControlName="username" placeholder="Nhập tài khoản">

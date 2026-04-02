@@ -1,5 +1,5 @@
 <div class="calendar-wrapper mat-elevation-z3">
-  
+
   <div class="header-container">
     <h2 class="title">Lịch Trực Chi Tiết</h2>
 
@@ -19,3 +19,40 @@
   </div>
 
 </div>
+<ng-template #infoWorkDialog>
+  <h2 mat-dialog-title style="color: #05460a; font-weight: bold; margin-bottom: 10px;">
+    Chi Tiết Ca Trực
+  </h2>
+
+  <mat-dialog-content>
+    <div style="margin-bottom: 15px; font-size: 15px;">
+      <p style="margin: 5px 0;">
+        <strong>Bắt đầu:</strong> {{ selectedEvent?.start | date:'HH:mm - dd/MM/yyyy' }}
+      </p>
+      <p style="margin: 5px 0;">
+        <strong>Kết thúc:</strong> {{ selectedEvent?.end | date:'HH:mm - dd/MM/yyyy' }}
+      </p>
+    </div>
+
+    <h3 style="font-weight: bold; margin-bottom: 10px;">Nhân viên trong ca ({{ selectedEvent?.employees?.length || 0
+      }}):</h3>
+    <ul style="list-style-type: none; padding-left: 0;">
+      <li *ngFor="let emp of selectedEvent?.employees"
+        style="padding: 8px 0; border-bottom: 1px dashed #ccc; font-size: 15px;">
+        <div [style.color]="emp.gender.toLowerCase() === 'nam' ? '#2d5a9e' : '#8d3363'" style="font-weight: bold;">
+          {{ emp.name }}
+        </div>
+        <div style="color: #05460a; font-weight: normal;">
+          Lương: {{ emp.salaryDay ? emp.salaryDay.toLocaleString('en-US') + 'đ' : '0đ' }}
+        </div>
+        <div *ngIf="emp.isMopping" style="color: #05460a; font-weight: normal;">
+          Lau nhà: {{ formattedMopping }}đ
+        </div>
+      </li>
+    </ul>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button mat-dialog-close color="warn">Đóng</button>
+  </mat-dialog-actions>
+</ng-template>
