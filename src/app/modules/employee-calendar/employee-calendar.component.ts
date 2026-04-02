@@ -133,10 +133,12 @@ export class EmployeeCalendarComponent implements OnInit {
     const tokenTichHop = localStorage.getItem('tokenTichHop');
     if (token) {
       const decodedUser = this.jwtToken.decodeToken(token);
-      this.isManager = decodedUser.role.role === 'manager';
-      this.gender = decodedUser.gender;
-      this.nameUser = decodedUser.name;
-      this.currentUserId = decodedUser._id || decodedUser.id;
+      this.isManager = decodedUser.role?.role === 'manager' || false;
+      if(!this.isManager) {
+        this.gender = decodedUser.gender;
+        this.nameUser = decodedUser.name;
+        this.currentUserId = decodedUser._id || decodedUser.id;
+      }
     }
     if (tokenTichHop) {
       const decodedUser = this.jwtToken.decodeToken(tokenTichHop);
