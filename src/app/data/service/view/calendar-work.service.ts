@@ -10,14 +10,22 @@ export class CalendarWorkService {
 
   private env = environment;
   private apiUrl = this.env.apiUrl;
-  private apiUrlTichHop = this.env.apiUrlTichHop;
 
   constructor(private http: HttpClient) {}
 
   getSchedulesByRange(fromDate: number, toDate: number, userId?: string | number): Observable<any[]> {
 
-    const token = localStorage.getItem('tokenTichHop');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    const token = localStorage.getItem('token');
+    const tokenTichHop = localStorage.getItem('tokenTichHop');
+    let headers = new HttpHeaders();
+    if (token && tokenTichHop) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+      headers = headers.set('x-tichhop-token', tokenTichHop);      
+    } else {
+      return new Observable<any[]>(subscriber => {
+        subscriber.error('Token not found');
+      });
+    }
     let params = new HttpParams()
       .set('month', fromDate)
       .set('year', toDate);
@@ -26,7 +34,7 @@ export class CalendarWorkService {
       params = params.set('accountId', userId.toString());
     }
 
-    return this.http.get<any[]>(`${this.apiUrlTichHop}/employee/get-work-list`, { params, headers });
+    return this.http.get<any[]>(`${this.apiUrl}/calendar-work/get-work-list`, { params, headers });
   }
 
 }
