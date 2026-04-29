@@ -15,6 +15,18 @@
   </div>
 
   <div class="calendar-body">
+    <div class="loading-overlay" *ngIf="isLoading">
+      <div class="loader">
+        <span><span></span><span></span><span></span><span></span></span>
+        <div class="base">
+          <span></span>
+          <div class="face"></div>
+        </div>
+      </div>
+      <div class="longfazers">
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
     <full-calendar #calendar [options]="calendarOptions"></full-calendar>
   </div>
 

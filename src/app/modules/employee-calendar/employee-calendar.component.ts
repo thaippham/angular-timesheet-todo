@@ -7,6 +7,7 @@ import viLocale from '@fullcalendar/core/locales/vi';
 import { forkJoin } from 'rxjs';
 import { TemplateRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-employee-calendar',
@@ -14,6 +15,7 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrls: ['./employee-calendar.component.scss']
 })
 export class EmployeeCalendarComponent implements OnInit {
+  isLoading: boolean = false;
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
   @ViewChild('infoWorkDialog') infoWorkDialog!: TemplateRef<any>;
   selectedEvent: any = null;
@@ -134,7 +136,7 @@ export class EmployeeCalendarComponent implements OnInit {
     if (token) {
       const decodedUser = this.jwtToken.decodeToken(token);
       this.isManager = decodedUser.role?.role === 'manager' || false;
-      if(!this.isManager) {
+      if (!this.isManager) {
         this.gender = decodedUser.gender;
         this.nameUser = decodedUser.name;
         this.currentUserId = decodedUser._id || decodedUser.id;
@@ -173,7 +175,7 @@ export class EmployeeCalendarComponent implements OnInit {
 
     this.dialog.open(this.infoWorkDialog, {
       width: '450px',
-      autoFocus: false
+      restoreFocus: false
     });
   }
 
@@ -236,26 +238,35 @@ export class EmployeeCalendarComponent implements OnInit {
     const apiRequests = monthsToFetch.map(m =>
       this.calendarWorkService.getSchedulesByRange(m.month, m.year, userIdToFetch)
     );
+    this.isLoading = true;
 
-    forkJoin(apiRequests).subscribe({
-      next: (responses: any[]) => {
-        let newWorksData: any[] = [];
+    forkJoin(apiRequests)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
+      .subscribe({
+        next: (responses: any[]) => {
+          let newWorksData: any[] = [];
 
-        responses.forEach((res, index) => {
-          const worksData = res?.data?.works || res?.works || res || [];
-          newWorksData = [...newWorksData, ...worksData];
+          responses.forEach((res, index) => {
+            const worksData = res?.data?.works || res?.works || res || [];
+            newWorksData = [...newWorksData, ...worksData];
 
-          this.fetchedMonths.add(monthsToFetch[index].key);
-        });
+            this.fetchedMonths.add(monthsToFetch[index].key);
+          });
 
-        const formattedNewShifts = this.formatDataForCalendar(newWorksData);
+          const formattedNewShifts = this.formatDataForCalendar(newWorksData);
 
-        this.allShifts = [...this.allShifts, ...formattedNewShifts];
+          this.allShifts = [...this.allShifts, ...formattedNewShifts];
 
-        this.filterEvents();
-      },
-      error: (err) => console.error("Lỗi khi gọi API chấm công", err)
-    });
+          this.filterEvents();
+        },
+        error: (err) => {
+          console.error("Lỗi khi gọi API chấm công", err);
+        }
+      });
   }
   formatDataForCalendar(worksData: any[]): any[] {
     let formattedShifts: any[] = [];
@@ -271,7 +282,7 @@ export class EmployeeCalendarComponent implements OnInit {
 
       let parsedSalary = 0;
       if (work.salary) {
-        const salaryString = work.salary.toString().split('=')[0]; 
+        const salaryString = work.salary.toString().split('=')[0];
         parsedSalary = Number(salaryString);
       }
 

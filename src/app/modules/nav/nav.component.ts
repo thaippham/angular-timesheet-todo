@@ -40,7 +40,7 @@ export class NavComponent {
     localStorage.removeItem('tokenTichHop');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    this.router.navigate(['/login']); 
+    this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
   }
 
 }

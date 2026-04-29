@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/data/service/auth/auth.service';
 
 @Component({
@@ -16,16 +16,17 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
   isFirstLogin = false;
 
+  returnUrl: string = '/';
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
-    if (localStorage.getItem('token')) {
-      this.router.navigate(['/']);
-    }
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
     this.loginForm = this.fb.group({
       name: [''],
@@ -53,7 +54,7 @@ export class LoginComponent implements OnInit {
             path: encodedGender
           }
           localStorage.setItem('user', JSON.stringify(userInfo));
-          this.router.navigate(['/']);
+          this.router.navigateByUrl(this.returnUrl);
         }else{
           this.loginForm.get('name')?.setValidators(Validators.required);
           this.isFirstLogin = true;

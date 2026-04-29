@@ -29,6 +29,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { MatMenuModule } from '@angular/material/menu';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { LoginModule } from './modules/login/login.module';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 FullCalendarModule.registerPlugins([
   dayGridPlugin,
@@ -64,7 +65,8 @@ FullCalendarModule.registerPlugins([
     MatSidenavModule,
     HttpClientModule,
     MatMenuModule,
-    LoginModule
+    LoginModule,
+    MatProgressSpinnerModule
   ],
   providers: [
     {
