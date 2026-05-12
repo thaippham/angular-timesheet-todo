@@ -48,6 +48,7 @@ export class LoginComponent implements OnInit {
           const encodedGender = btoa(encodeURIComponent(response?.data?.gender || response?.user.gender));
 
           localStorage.setItem('token', response?.token);
+          localStorage.setItem('refresh_token', response?.refreshToken)
           localStorage.setItem('tokenTichHop', response?.tokenTichHop);
           const userInfo = {
             name: response.user?.name || this.loginForm.value.username,

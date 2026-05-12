@@ -30,6 +30,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { LoginModule } from './modules/login/login.module';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+export function tokenGetter() {
+  return localStorage.getItem('token'); 
+}
+
 FullCalendarModule.registerPlugins([
   dayGridPlugin,
   timeGridPlugin,
@@ -67,9 +71,7 @@ FullCalendarModule.registerPlugins([
     LoginModule,
     MatProgressSpinnerModule
   ],
-  providers: [
-    AuthGuard
-  ],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -35,7 +35,7 @@ export class ShiftScheduleComponent implements OnInit {
     const token = localStorage.getItem('token');
     if (token) {
       const decodedUser = this.jwtToken.decodeToken(token);
-      this.isManager = decodedUser.role.role === 'manager';
+      this.isManager = decodedUser.role === 'manager';
     }
 
     this.loadData();

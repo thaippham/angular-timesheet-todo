@@ -15,11 +15,9 @@ export class CalendarWorkService {
 
   getSchedulesByRange(fromDate: number, toDate: number, userId?: string | number): Observable<any[]> {
 
-    const token = localStorage.getItem('token');
     const tokenTichHop = localStorage.getItem('tokenTichHop');
     let headers = new HttpHeaders();
-    if (token && tokenTichHop) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
+    if (tokenTichHop) {
       headers = headers.set('x-tichhop-token', tokenTichHop);      
     } else {
       return new Observable<any[]>(subscriber => {

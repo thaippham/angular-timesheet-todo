@@ -12,7 +12,7 @@ export class AppComponent implements OnInit {
     const storedUser = localStorage.getItem('user');
     if (storedUser !== undefined && storedUser !== null && storedUser.length > 0) {
       const user = JSON.parse(storedUser);
-      this.userName = user?.name || 'Khách';
+      this.userName = user?.name || 'Unknown';
     }
   }
 }

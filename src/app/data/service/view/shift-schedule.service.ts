@@ -13,13 +13,9 @@ export class ShiftScheduleService {
   constructor(private http: HttpClient) { }
 
   getSchedules(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<any>(`${this.apiUrl}/schedule/get-shift-schedule`, { headers });
+    return this.http.get<any>(`${this.apiUrl}/schedule/get-shift-schedule`);
   }
   addSchedule(data: any): Observable<any> {
-  const token = localStorage.getItem('token');
-  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-  return this.http.post<any>(`${this.apiUrl}/schedule/add-shift-schedule`, data, { headers });
-}
+    return this.http.post<any>(`${this.apiUrl}/schedule/add-shift-schedule`, data);
+  }
 }
